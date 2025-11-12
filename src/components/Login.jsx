@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth } from "../firebase";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import AuthLayout from "../layouts/AuthLayout";
 import { toast } from "react-toastify";
 
@@ -10,17 +17,26 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/dashboard");
+    }
+  }, [currentUser, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Set session persistence for independent tab sessions
+      await setPersistence(auth, browserSessionPersistence);
       await signInWithEmailAndPassword(auth, email, password);
       toast.success("✅ Logged in successfully!");
-      setTimeout(() => navigate("/dashboard"), 1200);
+      // Navigation happens automatically
     } catch (error) {
       toast.error("⚠️ " + error.message);
-    } finally {
       setLoading(false);
     }
   };
@@ -29,12 +45,13 @@ export default function Login() {
     const provider = new GoogleAuthProvider();
     setLoading(true);
     try {
+      // Set session persistence for independent tab sessions
+      await setPersistence(auth, browserSessionPersistence);
       await signInWithPopup(auth, provider);
       toast.success("✅ Logged in with Google!");
-      setTimeout(() => navigate("/dashboard"), 1200);
+      // Navigation happens automatically
     } catch (error) {
       toast.error("⚠️ " + error.message);
-    } finally {
       setLoading(false);
     }
   };

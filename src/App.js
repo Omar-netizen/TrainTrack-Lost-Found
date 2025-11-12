@@ -11,10 +11,12 @@ import ItemDetails from "./components/ItemDetails";
 import AdminDashboard from "./components/Admin/AdminDashboard";
 import UserProfile from "./components/UserProfile";
 import Messages from "./components/Messages";
+import { AuthProvider } from './contexts/AuthContext';
 
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
@@ -64,11 +66,13 @@ function App() {
     </PrivateRoute>
   }
 /> 
+
       </Routes>
 
       {/* Toast container should be outside Routes */}
       <ToastContainer position="top-center" autoClose={2500} />
     </Router>
+    </AuthProvider>
   );
 }
 

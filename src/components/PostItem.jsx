@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AuthLayout from "../layouts/AuthLayout";
 import { loadModel, getImageEmbedding } from "../utils/imageEmbeddings";
+import { indianRailwayStations } from "../data/stations"; // Import stations list
 
 export default function PostItem() {
   const [type, setType] = useState("Lost");
@@ -13,10 +14,24 @@ export default function PostItem() {
   const [category, setCategory] = useState("");
   const [station, setStation] = useState("");
   const [trainNumber, setTrainNumber] = useState("");
-  const [date, setDate] = useState("");
+  
+  // NEW: Auto-fill current date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const [date, setDate] = useState(getTodayDate()); // Auto-filled with today's date
   const [photoUrl, setPhotoUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
+  
+  // NEW: For searchable station dropdown
+  const [showStationDropdown, setShowStationDropdown] = useState(false);
+  const [filteredStations, setFilteredStations] = useState(indianRailwayStations);
 
   const navigate = useNavigate();
 
@@ -41,6 +56,26 @@ export default function PostItem() {
     }
     
     return link;
+  };
+
+  // NEW: Handle station search/filter
+  const handleStationSearch = (searchTerm) => {
+    setStation(searchTerm);
+    if (searchTerm.trim() === "") {
+      setFilteredStations(indianRailwayStations);
+    } else {
+      const filtered = indianRailwayStations.filter((st) =>
+        st.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredStations(filtered);
+    }
+    setShowStationDropdown(true);
+  };
+
+  // NEW: Select station from dropdown
+  const selectStation = (selectedStation) => {
+    setStation(selectedStation);
+    setShowStationDropdown(false);
   };
 
   // Load model on component mount
@@ -99,7 +134,7 @@ export default function PostItem() {
         trainNumber,
         date,
         photoUrl: cleanUrl,
-        imageEmbedding, // Store the embedding
+        imageEmbedding,
         postedBy: auth.currentUser.uid,
         posterEmail: auth.currentUser.email,
         status: "active",
@@ -176,31 +211,69 @@ export default function PostItem() {
           required
         />
 
-        <input
-          type="text"
-          placeholder="Station"
-          className="w-full p-3 border rounded-lg"
-          value={station}
-          onChange={(e) => setStation(e.target.value)}
-          required
-        />
+        {/* NEW: Searchable Station Dropdown */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="🔍 Search and select station"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+            value={station}
+            onChange={(e) => handleStationSearch(e.target.value)}
+            onFocus={() => setShowStationDropdown(true)}
+            required
+          />
+          
+          {/* Dropdown list */}
+          {showStationDropdown && filteredStations.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {filteredStations.map((st, index) => (
+                <div
+                  key={index}
+                  className="p-3 hover:bg-indigo-50 cursor-pointer border-b last:border-b-0"
+                  onClick={() => selectStation(st)}
+                >
+                  🚉 {st}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {showStationDropdown && filteredStations.length === 0 && station && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-gray-500 text-sm">
+              No stations found. Try typing differently.
+            </div>
+          )}
+        </div>
 
+        {/* NEW: Numbers-only Train Number input */}
         <input
           type="text"
-          placeholder="Train Number"
-          className="w-full p-3 border rounded-lg"
+          placeholder="Train Number (numbers only)"
+          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
           value={trainNumber}
-          onChange={(e) => setTrainNumber(e.target.value)}
+          onChange={(e) => {
+            // Allow only numbers
+            const value = e.target.value.replace(/[^0-9]/g, '');
+            setTrainNumber(value);
+          }}
+          pattern="[0-9]*"
+          inputMode="numeric"
           required
         />
 
-        <input
-          type="date"
-          className="w-full p-3 border rounded-lg"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
+        {/* NEW: Date input with auto-filled current date */}
+        <div>
+          <input
+            type="date"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            📅 Default: Today's date (you can change it)
+          </p>
+        </div>
 
         <div>
           <input
