@@ -1,70 +1,143 @@
-# Getting Started with Create React App
+# 🚆 TrainTrack: Lost & Found Web Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 1. Introduction
 
-## Available Scripts
+**TrainTrack: Lost & Found** is a web-based application designed to simplify the process of reporting and finding lost items in train stations or trains.  
+The platform allows users to post details of lost or found items, view other users’ reports, and use **AI-based visual matching** to identify similar items.  
+This system bridges the communication gap between passengers and authorities by creating a **centralized, user-friendly solution** for lost-and-found management.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 2. Objectives
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Provide a digital platform for reporting and tracking lost or found items.  
+- Ensure user authentication and data security using **Firebase**.  
+- Use **Artificial Intelligence** for image-based similarity detection between items.  
+- Enable administrators to monitor, verify, and manage user reports effectively.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 3. Technologies Used
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| **Category** | **Technologies** |
+|---------------|------------------|
+| **Frontend** | React.js, Tailwind CSS |
+| **Backend / Database** | Firebase Authentication, Firebase Firestore |
+| **Image Hosting** | [ImgBB](https://imgbb.com/) |
+| **Machine Learning** | TensorFlow.js (MobileNet Model) |
+| **Admin Verification** | Firestore user roles with custom rules |
+| **Deployment** | Pending (to be hosted on Firebase Hosting or Vercel) |
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 4. System Overview
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 🔑 Authentication Module
+- Sign up, login, and logout functionalities.  
+- Firebase Authentication integration.  
+- Private routing for authenticated users.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 📦 Lost/Found Posting Module
+- Users can submit item details with image links (hosted on ImgBB).  
+- Data stored securely in Firestore.
 
-### `npm run eject`
+### 📊 Dashboard Module
+- Displays all reported lost and found items in a grid layout.  
+- Filtered and dynamically updated from Firestore.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 🧾 Item Details & Contact Reporter
+- Displays full information about a selected item.  
+- Includes a **“Contact Reporter”** button that opens an email client using a `mailto:` link.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 🤖 AI Image Matching
+- Uses **TensorFlow.js** with **MobileNet** to generate image embeddings.  
+- Compares new items with existing ones using **cosine similarity**.  
+- Displays the top three visually similar items as **“Possible Matches”**.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 🛠️ Admin Dashboard
+- Admins (users with `role: "admin"`) can view all posts and user data.  
+- Admins can delete inappropriate or duplicate entries.  
+- Displays key statistics (total posts, users, lost/found ratio).
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 5. Firestore Security Rules
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Normal Users
+- Can read all items.  
+- Can create or modify **only their own** posts.  
+- Can view and update their own user document.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Admin Users
+- Can access all documents in `items`, `users`, and `messages` collections.  
+- Can delete or update any post.  
 
-### Code Splitting
+Access control is enforced using a helper function `isAdmin()` in Firestore rules.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+## 6. Machine Learning Integration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+The application integrates **TensorFlow.js (MobileNet)** to compute image embeddings for uploaded items.  
+Each image is converted into a **vector representation**, which is compared with other item embeddings using **cosine similarity**.  
 
-### Making a Progressive Web App
+Results are displayed as **“Possible Matches”**, showing users items that look visually similar.  
+This approach is **lightweight**, **client-side**, and requires **no backend computation or external API costs**.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## 7. Folder Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+src/
+│
+├── firebase.js
+├── App.js
+├── index.js
+│
+├── components/
+│ ├── Auth/
+│ │ ├── Login.jsx
+│ │ └── Signup.jsx
+│ ├── Dashboard.jsx
+│ ├── PostItem.jsx
+│ ├── ItemCard.jsx
+│ ├── ItemDetails.jsx
+│ ├── PrivateRoute.jsx
+│ └── AdminDashboard.jsx
+│
+├── layouts/
+│ └── AuthLayout.jsx
+│
+├── utils/
+│ ├── imageEmbedding.js
+│ └── adminUtils.js
+│
+└── styles/
+└── (Tailwind CSS files)
 
-### Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 8. Future Enhancements
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Implement text-based matching using **NLP embeddings** for item descriptions.  
+- Add **geolocation support** for nearby station detection.  
+- Integrate **push/email notifications** when a potential match is found.  
+- Deploy the application using **Firebase Hosting** or **Vercel**.  
+- Add **multi-language support** for better accessibility.
+
+---
+
+## 9. Conclusion
+
+**TrainTrack: Lost & Found** demonstrates how Artificial Intelligence can enhance real-world systems for social benefit.  
+It provides a **practical, secure, and intelligent platform** that combines user-friendly design, robust authentication, and visual similarity analysis to improve lost item recovery efficiency in railway systems.
+
+---
+
+## 10. Credits
+
+**Project Title:** TrainTrack: Lost & Found Web Application  
+**Developed by:** Md. Omar Khan  
+**Technology Stack:** React.js, Firebase, TensorFlow.js, ImgBB, Tailwind CSS  
+**Year:** 2025
